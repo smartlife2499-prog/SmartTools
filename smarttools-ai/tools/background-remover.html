@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Background Remover — SmartTools AI</title>
+  <meta name="description" content="Remove image backgrounds. Client-side AI option available via @imgly/background-removal." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>🖼️ Background Remover</h1>
+    <p>Upload an image to preview. Full on-device AI background removal can be enabled with the open-source @imgly/background-removal library (ONNX in browser).</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="card">
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">🖼️</div>
+        <p>Drop an image here or click to select</p>
+        <p class="text-sm text-muted">PNG, JPG, WebP supported. Preview only in this demo version.</p>
+        <input type="file" id="fileInput" accept="image/*" />
+      </div>
+      <div id="status" class="text-sm text-muted mt-1"></div>
+      <div id="previewArea" class="hidden mt-2">
+        <img id="preview" class="preview-img" alt="Preview" />
+        <div class="btn-group mt-1">
+          <button class="btn btn-primary" id="processBtn">✨ Remove Background (demo note)</button>
+          <a id="downloadOrig" class="btn btn-secondary" download>💾 Download Original</a>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>How to enable real AI removal</h2>
+      <p class="text-muted text-sm">
+        For production, add the library (works fully client-side after model download ~30 MB, then cached):
+      </p>
+      <pre class="result-box text-sm" style="overflow-x:auto">npm install @imgly/background-removal onnxruntime-web
+
+import { removeBackground } from '@imgly/background-removal';
+const blob = await removeBackground(imageFile);
+// then display / download the transparent PNG</pre>
+      <p class="text-sm text-muted mt-1">No server, no API key, files never leave the browser. Perfect match for SmartTools AI’s privacy-first approach.</p>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    let currentUrl = null;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        document.getElementById('status').textContent = 'Please select an image.';
+        return;
+      }
+      if (currentUrl) URL.revokeObjectURL(currentUrl);
+      currentUrl = URL.createObjectURL(file);
+      document.getElementById('preview').src = currentUrl;
+      document.getElementById('downloadOrig').href = currentUrl;
+      document.getElementById('downloadOrig').download = file.name;
+      document.getElementById('previewArea').classList.remove('hidden');
+      document.getElementById('status').textContent = `Loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+    }
+
+    document.getElementById('processBtn').addEventListener('click', () => {
+      document.getElementById('status').textContent = 'In this static demo the AI model is not bundled (size). Add @imgly/background-removal as shown above for real on-device removal. Your image stayed local.';
+    });
+  </script>
+</body>
+</html>

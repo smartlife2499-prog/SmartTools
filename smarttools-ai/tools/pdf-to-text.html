@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF → Text — SmartTools AI</title>
+  <meta name="description" content="Extract text from PDF files entirely in your browser. Free, private, no upload." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav">
+        <button id="themeToggle" class="theme-toggle">☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📑 PDF → Text</h1>
+    <p>Extract clean text from PDF files. Processing happens locally — your document never leaves the device.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="card">
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">📄</div>
+        <p>Drop a PDF here or click to select</p>
+        <p class="text-sm text-muted">Works with text-based PDFs. Scanned image PDFs need OCR (not included).</p>
+        <input type="file" id="fileInput" accept="application/pdf" />
+      </div>
+      <div id="status" class="text-sm text-muted mt-1"></div>
+      <div class="btn-group mt-1">
+        <button class="btn btn-secondary" id="copyBtn" disabled>📋 Copy Text</button>
+        <button class="btn btn-secondary" id="downloadBtn" disabled>💾 Download .txt</button>
+      </div>
+      <label class="mt-2">Extracted Text</label>
+      <textarea id="output" rows="16" placeholder="Extracted text will appear here..." readonly></textarea>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    async function handleFile(file) {
+      if (file.type !== 'application/pdf') {
+        status.textContent = 'Please select a PDF file.';
+        return;
+      }
+      status.textContent = 'Extracting text…';
+      output.value = '';
+      document.getElementById('copyBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(' ');
+          fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+          status.textContent = `Extracting… page ${i}/${pdf.numPages}`;
+        }
+        output.value = fullText.trim();
+        status.textContent = `Done. ${pdf.numPages} page(s) extracted.`;
+        document.getElementById('copyBtn').disabled = false;
+        document.getElementById('downloadBtn').disabled = false;
+        SmartTools.addToHistory('pdf2text', { preview: file.name + ` (${pdf.numPages} pages)` });
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        console.error(err);
+      }
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const ok = await SmartTools.copyText(output.value);
+      status.textContent = ok ? 'Copied to clipboard!' : 'Copy failed';
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      SmartTools.downloadText(output.value, 'extracted-text.txt');
+    });
+  </script>
+</body>
+</html>

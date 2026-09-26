@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculators & Converters — SmartTools AI</title>
+  <meta name="description" content="Free online calculators: BMI, loan EMI, tip, percentage, unit converters. Instant results, no signup." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav">
+        <button id="themeToggle" class="theme-toggle">☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>🔢 Calculators & Converters</h1>
+    <p>Instant results. Everything runs in your browser — no data leaves your device.</p>
+  </div>
+
+  <div class="tool-body">
+    <!-- BMI -->
+    <div class="card">
+      <h2>BMI Calculator</h2>
+      <div class="calc-grid">
+        <div>
+          <label>Weight (kg)</label>
+          <input type="number" id="bmiWeight" placeholder="70" step="0.1" />
+        </div>
+        <div>
+          <label>Height (cm)</label>
+          <input type="number" id="bmiHeight" placeholder="175" step="0.1" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="calcBMI()">Calculate BMI</button>
+      <div id="bmiResult" class="calc-result"></div>
+    </div>
+
+    <!-- Loan / EMI -->
+    <div class="card">
+      <h2>Loan / EMI Calculator</h2>
+      <div class="calc-grid">
+        <div>
+          <label>Principal (amount)</label>
+          <input type="number" id="loanP" placeholder="100000" />
+        </div>
+        <div>
+          <label>Annual Interest Rate (%)</label>
+          <input type="number" id="loanR" placeholder="8.5" step="0.01" />
+        </div>
+        <div>
+          <label>Tenure (months)</label>
+          <input type="number" id="loanN" placeholder="60" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="calcEMI()">Calculate EMI</button>
+      <div id="emiResult" class="calc-result"></div>
+    </div>
+
+    <!-- Tip -->
+    <div class="card">
+      <h2>Tip Calculator</h2>
+      <div class="calc-grid">
+        <div>
+          <label>Bill Amount</label>
+          <input type="number" id="tipBill" placeholder="50" step="0.01" />
+        </div>
+        <div>
+          <label>Tip %</label>
+          <input type="number" id="tipPct" placeholder="15" />
+        </div>
+        <div>
+          <label>Split between (people)</label>
+          <input type="number" id="tipSplit" placeholder="1" min="1" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="calcTip()">Calculate Tip</button>
+      <div id="tipResult" class="calc-result"></div>
+    </div>
+
+    <!-- Percentage -->
+    <div class="card">
+      <h2>Percentage Calculator</h2>
+      <div class="calc-grid">
+        <div>
+          <label>What is X% of Y?</label>
+          <input type="number" id="pctX" placeholder="20" /> of
+          <input type="number" id="pctY" placeholder="150" />
+          <button class="btn btn-secondary mt-1" onclick="calcPctOf()">Calculate</button>
+          <div id="pctOfResult" class="calc-result"></div>
+        </div>
+        <div>
+          <label>X is what % of Y?</label>
+          <input type="number" id="pctA" placeholder="30" /> is what % of
+          <input type="number" id="pctB" placeholder="200" />
+          <button class="btn btn-secondary mt-1" onclick="calcWhatPct()">Calculate</button>
+          <div id="whatPctResult" class="calc-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unit Converters -->
+    <div class="card">
+      <h2>Unit Converters</h2>
+      <div class="calc-grid">
+        <div>
+          <label>Length</label>
+          <input type="number" id="lenVal" placeholder="1" />
+          <select id="lenFrom">
+            <option value="m">Meters</option>
+            <option value="km">Kilometers</option>
+            <option value="cm">Centimeters</option>
+            <option value="mi">Miles</option>
+            <option value="ft">Feet</option>
+            <option value="in">Inches</option>
+          </select>
+          to
+          <select id="lenTo">
+            <option value="km">Kilometers</option>
+            <option value="m">Meters</option>
+            <option value="cm">Centimeters</option>
+            <option value="mi">Miles</option>
+            <option value="ft">Feet</option>
+            <option value="in">Inches</option>
+          </select>
+          <button class="btn btn-secondary mt-1" onclick="convertLength()">Convert</button>
+          <div id="lenResult" class="calc-result"></div>
+        </div>
+        <div>
+          <label>Weight</label>
+          <input type="number" id="wtVal" placeholder="1" />
+          <select id="wtFrom">
+            <option value="kg">Kilograms</option>
+            <option value="g">Grams</option>
+            <option value="lb">Pounds</option>
+            <option value="oz">Ounces</option>
+          </select>
+          to
+          <select id="wtTo">
+            <option value="lb">Pounds</option>
+            <option value="kg">Kilograms</option>
+            <option value="g">Grams</option>
+            <option value="oz">Ounces</option>
+          </select>
+          <button class="btn btn-secondary mt-1" onclick="convertWeight()">Convert</button>
+          <div id="wtResult" class="calc-result"></div>
+        </div>
+        <div>
+          <label>Temperature</label>
+          <input type="number" id="tempVal" placeholder="25" />
+          <select id="tempFrom">
+            <option value="c">Celsius</option>
+            <option value="f">Fahrenheit</option>
+            <option value="k">Kelvin</option>
+          </select>
+          to
+          <select id="tempTo">
+            <option value="f">Fahrenheit</option>
+            <option value="c">Celsius</option>
+            <option value="k">Kelvin</option>
+          </select>
+          <button class="btn btn-secondary mt-1" onclick="convertTemp()">Convert</button>
+          <div id="tempResult" class="calc-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    function calcBMI() {
+      const w = parseFloat(document.getElementById('bmiWeight').value);
+      const h = parseFloat(document.getElementById('bmiHeight').value) / 100;
+      if (!w || !h) return;
+      const bmi = w / (h * h);
+      let cat = '';
+      if (bmi < 18.5) cat = 'Underweight';
+      else if (bmi < 25) cat = 'Normal';
+      else if (bmi < 30) cat = 'Overweight';
+      else cat = 'Obese';
+      document.getElementById('bmiResult').textContent = `BMI: ${bmi.toFixed(1)} (${cat})`;
+    }
+
+    function calcEMI() {
+      const P = parseFloat(document.getElementById('loanP').value);
+      const annualR = parseFloat(document.getElementById('loanR').value);
+      const N = parseInt(document.getElementById('loanN').value, 10);
+      if (!P || !annualR || !N) return;
+      const r = annualR / 12 / 100;
+      const emi = P * r * Math.pow(1 + r, N) / (Math.pow(1 + r, N) - 1);
+      const total = emi * N;
+      const interest = total - P;
+      document.getElementById('emiResult').innerHTML = `
+        EMI: ${emi.toFixed(2)}<br>
+        Total Payment: ${total.toFixed(2)}<br>
+        Total Interest: ${interest.toFixed(2)}
+      `;
+    }
+
+    function calcTip() {
+      const bill = parseFloat(document.getElementById('tipBill').value);
+      const pct = parseFloat(document.getElementById('tipPct').value);
+      const split = parseInt(document.getElementById('tipSplit').value, 10) || 1;
+      if (!bill || !pct) return;
+      const tip = bill * (pct / 100);
+      const total = bill + tip;
+      document.getElementById('tipResult').innerHTML = `
+        Tip: ${tip.toFixed(2)}<br>
+        Total: ${total.toFixed(2)}<br>
+        Per person: ${(total / split).toFixed(2)}
+      `;
+    }
+
+    function calcPctOf() {
+      const x = parseFloat(document.getElementById('pctX').value);
+      const y = parseFloat(document.getElementById('pctY').value);
+      if (isNaN(x) || isNaN(y)) return;
+      document.getElementById('pctOfResult').textContent = `${x}% of ${y} = ${(x / 100 * y).toFixed(2)}`;
+    }
+
+    function calcWhatPct() {
+      const a = parseFloat(document.getElementById('pctA').value);
+      const b = parseFloat(document.getElementById('pctB').value);
+      if (!b) return;
+      document.getElementById('whatPctResult').textContent = `${a} is ${((a / b) * 100).toFixed(2)}% of ${b}`;
+    }
+
+    const lenFactors = { m: 1, km: 1000, cm: 0.01, mi: 1609.344, ft: 0.3048, in: 0.0254 };
+    function convertLength() {
+      const val = parseFloat(document.getElementById('lenVal').value);
+      const from = document.getElementById('lenFrom').value;
+      const to = document.getElementById('lenTo').value;
+      if (isNaN(val)) return;
+      const meters = val * lenFactors[from];
+      const result = meters / lenFactors[to];
+      document.getElementById('lenResult').textContent = `${result.toFixed(6)} ${to}`;
+    }
+
+    const wtFactors = { kg: 1, g: 0.001, lb: 0.453592, oz: 0.0283495 };
+    function convertWeight() {
+      const val = parseFloat(document.getElementById('wtVal').value);
+      const from = document.getElementById('wtFrom').value;
+      const to = document.getElementById('wtTo').value;
+      if (isNaN(val)) return;
+      const kg = val * wtFactors[from];
+      const result = kg / wtFactors[to];
+      document.getElementById('wtResult').textContent = `${result.toFixed(6)} ${to}`;
+    }
+
+    function convertTemp() {
+      const val = parseFloat(document.getElementById('tempVal').value);
+      const from = document.getElementById('tempFrom').value;
+      const to = document.getElementById('tempTo').value;
+      if (isNaN(val)) return;
+      let c;
+      if (from === 'c') c = val;
+      else if (from === 'f') c = (val - 32) * 5 / 9;
+      else c = val - 273.15;
+      let result;
+      if (to === 'c') result = c;
+      else if (to === 'f') result = c * 9 / 5 + 32;
+      else result = c + 273.15;
+      document.getElementById('tempResult').textContent = `${result.toFixed(2)} °${to.toUpperCase()}`;
+    }
+  </script>
+</body>
+</html>

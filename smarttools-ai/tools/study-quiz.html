@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study & Quiz Generator — SmartTools AI</title>
+  <meta name="description" content="Turn notes into flashcards and quizzes with Gemini AI." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📚 Study & Quiz Generator</h1>
+    <p>Paste notes and generate high-quality Q&A cards with Gemini AI.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>Your notes / study material</label>
+      <textarea id="notes" rows="8" placeholder="Paste your notes, textbook excerpt or key points here..."></textarea>
+      <label>Number of questions</label>
+      <select id="numQ">
+        <option value="5">5</option>
+        <option value="8" selected>8</option>
+        <option value="12">12</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="genBtn">✨ Generate Quiz with AI</button>
+        <button class="btn btn-secondary" id="clearBtn">Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Generated Cards</h2>
+      <div id="cards"></div>
+    </div>
+    <div class="card">
+      <h2>Local History</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('quiz', 'usage');
+
+    document.getElementById('genBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('quiz')) {
+        document.getElementById('cards').innerHTML = '<p>Daily limit reached.</p>';
+        return;
+      }
+      const notes = document.getElementById('notes').value.trim();
+      if (!notes) return;
+      const num = document.getElementById('numQ').value;
+      const btn = document.getElementById('genBtn');
+
+      SmartTools.setLoading(btn, true, 'Creating quiz…');
+      try {
+        let html = '';
+        if (true /* always use proxy */) {
+          const prompt = `Create ${num} high-quality study questions and answers from the following notes.
+Format exactly like this for each:
+Q: question text
+A: answer text
+
+Make questions test understanding, not just memorization. Mix short-answer and conceptual questions.
+
+Notes:
+${notes}`;
+          const out = await SmartTools.callGemini(prompt, 'You are an expert tutor who creates effective study questions.');
+          // Parse into cards
+          const blocks = out.split(/(?=Q:)/i).filter(b => b.trim());
+          blocks.forEach((block, i) => {
+            const qMatch = block.match(/Q:\s*([\s\S]*?)(?=A:|$)/i);
+            const aMatch = block.match(/A:\s*([\s\S]*)/i);
+            const q = qMatch ? qMatch[1].trim() : block.trim();
+            const a = aMatch ? aMatch[1].trim() : '';
+            html += `
+              <div class="history-item" style="flex-direction:column;align-items:stretch">
+                <strong>Q${i+1}:</strong> ${q}
+                <details class="mt-1"><summary class="text-sm text-muted">Show answer</summary><p class="mt-1">${a || '—'}</p></details>
+              </div>`;
+          });
+          if (!html) html = `<div class="result-box">${out}</div>`;
+        } else {
+          // simple local fallback
+          const lines = notes.split('\n').map(l => l.trim()).filter(Boolean).slice(0, parseInt(num));
+          lines.forEach((line, i) => {
+            html += `
+              <div class="history-item" style="flex-direction:column;align-items:stretch">
+                <strong>Q${i+1}:</strong> Explain or recall: ${line.slice(0, 80)}${line.length > 80 ? '…' : ''}
+                <details class="mt-1"><summary class="text-sm text-muted">Show answer</summary><p class="mt-1">${line}</p></details>
+              </div>`;
+          });
+          html += '<p class="text-sm text-muted mt-1">💡 Add a free Gemini key for much better AI-generated questions.</p>';
+        }
+        document.getElementById('cards').innerHTML = html;
+        SmartTools.incrementUsage('quiz');
+        SmartTools.showUsageNotice('quiz', 'usage');
+        SmartTools.addToHistory('quiz', { preview: `${num} cards generated` });
+        renderHist();
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('cards').innerHTML = '<p>Error: ' + msg + '</p>';
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('notes').value = '';
+      document.getElementById('cards').innerHTML = '';
+    });
+
+    function renderHist() {
+      SmartTools.renderHistory('quiz', 'history', item => `<span class="text-sm">${item.preview}</span>`);
+    }
+    renderHist();
+  </script>
+</body>
+</html>

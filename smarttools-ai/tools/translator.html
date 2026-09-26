@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translator — SmartTools AI</title>
+  <meta name="description" content="Translate text with Gemini AI. Supports many languages. Offline phrases as fallback." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>🌐 Translator</h1>
+    <p>Full AI translation with Gemini. Offline dictionary for common phrases when no key.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <div class="calc-grid">
+        <div>
+          <label>From</label>
+          <select id="fromLang">
+            <option value="auto">Auto-detect</option>
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Portuguese">Portuguese</option>
+            <option value="Italian">Italian</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Swahili">Swahili</option>
+          </select>
+        </div>
+        <div>
+          <label>To</label>
+          <select id="toLang">
+            <option value="Spanish">Spanish</option>
+            <option value="English">English</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Portuguese">Portuguese</option>
+            <option value="Italian">Italian</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Swahili">Swahili</option>
+          </select>
+        </div>
+      </div>
+      <label>Text</label>
+      <textarea id="input" rows="5" placeholder="Hello, how are you?"></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="translateBtn">✨ Translate with AI</button>
+        <button class="btn btn-secondary" id="swapBtn">⇄ Swap</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
+      </div>
+      <div id="result" class="result-box mt-2">Translation will appear here.</div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('trans', 'usage');
+
+    // Small offline fallback
+    const dict = {
+      'hello': { es: 'hola', fr: 'bonjour', de: 'hallo', pt: 'olá', it: 'ciao' },
+      'thank you': { es: 'gracias', fr: 'merci', de: 'danke', pt: 'obrigado', it: 'grazie' },
+      'goodbye': { es: 'adiós', fr: 'au revoir', de: 'auf wiedersehen', pt: 'adeus', it: 'arrivederci' },
+      'yes': { es: 'sí', fr: 'oui', de: 'ja', pt: 'sim', it: 'sì' },
+      'no': { es: 'no', fr: 'non', de: 'nein', pt: 'não', it: 'no' }
+    };
+
+    document.getElementById('translateBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('trans')) {
+        document.getElementById('result').textContent = 'Daily limit reached.';
+        return;
+      }
+      const text = document.getElementById('input').value.trim();
+      if (!text) return;
+      const from = document.getElementById('fromLang').value;
+      const to = document.getElementById('toLang').value;
+      const btn = document.getElementById('translateBtn');
+
+      SmartTools.setLoading(btn, true, 'Translating…');
+      try {
+        let out;
+        if (true /* always use proxy */) {
+          const prompt = from === 'auto'
+            ? `Detect the language of the following text and translate it into ${to}. Output only the translation, nothing else.\n\n${text}`
+            : `Translate the following text from ${from} to ${to}. Output only the translation, nothing else.\n\n${text}`;
+          out = await SmartTools.callGemini(prompt, 'You are a precise professional translator. Preserve meaning and tone.');
+        } else {
+          const key = text.toLowerCase();
+          const map = { Spanish: 'es', French: 'fr', German: 'de', Portuguese: 'pt', Italian: 'it' };
+          const code = map[to];
+          if (dict[key] && code && dict[key][code]) {
+            out = dict[key][code];
+          } else {
+            out = 'Could not translate offline. AI service may be unavailable.';
+          }
+        }
+        document.getElementById('result').textContent = out;
+        SmartTools.incrementUsage('trans');
+        SmartTools.showUsageNotice('trans', 'usage');
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('swapBtn').addEventListener('click', () => {
+      const f = document.getElementById('fromLang');
+      const t = document.getElementById('toLang');
+      if (f.value === 'auto') return;
+      const tmp = f.value;
+      f.value = t.value;
+      t.value = tmp;
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      SmartTools.copyText(document.getElementById('result').textContent);
+    });
+  </script>
+</body>
+</html>

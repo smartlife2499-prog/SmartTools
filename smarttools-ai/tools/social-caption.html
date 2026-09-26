@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Caption Generator — SmartTools AI</title>
+  <meta name="description" content="Generate social media captions with Gemini AI for Instagram, LinkedIn, X and more." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📱 Social Caption Generator</h1>
+    <p>Create ready-to-post captions powered by Gemini AI (no key needed).</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>What is the post about?</label>
+      <textarea id="topic" rows="3" placeholder="Launching our new productivity app that helps teams focus"></textarea>
+      <label>Platform / Style</label>
+      <select id="platform">
+        <option value="instagram">Instagram (engaging + emojis)</option>
+        <option value="linkedin">LinkedIn (professional)</option>
+        <option value="twitter">Twitter / X (short & punchy)</option>
+        <option value="facebook">Facebook (friendly)</option>
+        <option value="generic">Generic</option>
+      </select>
+      <label>Tone</label>
+      <select id="tone">
+        <option value="excited">Excited</option>
+        <option value="informative">Informative</option>
+        <option value="inspirational">Inspirational</option>
+        <option value="humorous">Humorous</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="genBtn">✨ Generate Captions with AI</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy First</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Captions</h2>
+      <div id="result" class="result-box">Captions will appear here.</div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('social', 'usage');
+
+    document.getElementById('genBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('social')) {
+        document.getElementById('result').textContent = 'Daily limit reached.';
+        return;
+      }
+      const topic = document.getElementById('topic').value.trim();
+      if (!topic) return;
+      const platform = document.getElementById('platform').value;
+      const tone = document.getElementById('tone').value;
+      const btn = document.getElementById('genBtn');
+
+      SmartTools.setLoading(btn, true, 'Writing…');
+      try {
+        let out;
+        if (true /* always use proxy */) {
+          const prompt = `Write 3 different social media captions for ${platform}.
+Topic: ${topic}
+Tone: ${tone}
+Make them ready to post. Number them 1, 2, 3. Include relevant hashtags where appropriate for the platform.`;
+          out = await SmartTools.callGemini(prompt, 'You are a skilled social media copywriter.');
+        } else {
+          out = `1. ${topic} 🚀\n\n2. Excited to share: ${topic}\n\n3. ${topic} — what do you think?`;
+        }
+        document.getElementById('result').textContent = out;
+        SmartTools.incrementUsage('social');
+        SmartTools.showUsageNotice('social', 'usage');
+        SmartTools.addToHistory('social', { preview: topic.slice(0, 60) });
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const text = document.getElementById('result').textContent;
+      const first = text.split(/\n\s*2[\.\)]/)[0].replace(/^1[\.\)]\s*/, '').trim();
+      SmartTools.copyText(first || text);
+    });
+  </script>
+</body>
+</html>

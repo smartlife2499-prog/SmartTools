@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Image Generator — SmartTools AI</title>
+  <meta name="description" content="Craft powerful image prompts with Gemini AI. Use them in any image model." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>🎨 AI Image Generator</h1>
+    <p>Describe what you want — Gemini turns it into a strong prompt you can paste into Midjourney, Flux, Imagen, etc.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>Describe the image you want</label>
+      <textarea id="prompt" rows="4" placeholder="A cozy coffee shop on a rainy evening, warm lighting, people reading books"></textarea>
+      <label>Style</label>
+      <select id="style">
+        <option value="photorealistic">Photorealistic</option>
+        <option value="digital art">Digital Art</option>
+        <option value="oil painting">Oil Painting</option>
+        <option value="anime">Anime</option>
+        <option value="minimalist">Minimalist</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="cinematic">Cinematic</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="enhanceBtn">✨ Enhance Prompt with AI</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy Prompt</button>
+        <button class="btn btn-secondary" id="saveBtn">💾 Save</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Enhanced Prompt</h2>
+      <div id="result" class="result-box">Your enhanced prompt will appear here. Copy it into any AI image tool.</div>
+      <p class="text-sm text-muted mt-1">Note: This tool creates excellent prompts. Actual image generation happens in Midjourney, Flux, Gemini Imagen, etc.</p>
+    </div>
+    <div class="card">
+      <h2>Saved Prompts</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('imggen', 'usage');
+
+    document.getElementById('enhanceBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('imggen')) {
+        document.getElementById('result').textContent = 'Daily limit reached.';
+        return;
+      }
+      const idea = document.getElementById('prompt').value.trim();
+      if (!idea) return;
+      const style = document.getElementById('style').value;
+      const btn = document.getElementById('enhanceBtn');
+
+      SmartTools.setLoading(btn, true, 'Enhancing…');
+      try {
+        let out;
+        if (true /* always use proxy */) {
+          out = await SmartTools.callGemini(
+            `Turn this idea into a single, highly detailed, ready-to-use image generation prompt in the style of "${style}". 
+Include lighting, composition, mood, and quality boosters. Output ONLY the prompt, nothing else.
+
+Idea: ${idea}`,
+            'You are an expert prompt engineer for AI image models (Midjourney, Flux, Stable Diffusion, Imagen).'
+          );
+        } else {
+          out = `${idea}, ${style}, highly detailed, best quality, 8k`;
+          out += '';
+        }
+        document.getElementById('result').textContent = out;
+        SmartTools.incrementUsage('imggen');
+        SmartTools.showUsageNotice('imggen', 'usage');
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      SmartTools.copyText(document.getElementById('result').textContent);
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const p = document.getElementById('result').textContent;
+      if (!p || p.includes('will appear')) return;
+      SmartTools.addToHistory('imggen', { preview: p.slice(0, 90) + (p.length > 90 ? '…' : ''), text: p });
+      renderHist();
+    });
+
+    function renderHist() {
+      SmartTools.renderHistory('imggen', 'history', item => `<span class="text-sm">${item.preview}</span>`);
+    }
+    renderHist();
+  </script>
+</body>
+</html>

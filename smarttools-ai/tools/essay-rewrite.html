@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Essay & Rewrite — SmartTools AI</title>
+  <meta name="description" content="Rewrite, expand or improve your essays and text with Gemini AI. Local history." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav">
+        <button id="themeToggle" class="theme-toggle">☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📝 Essay & Rewrite</h1>
+    <p>Rewrite, expand, shorten or improve tone with real Gemini AI. Uses Gemini AI via secure server proxy.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>Original text</label>
+      <textarea id="input" rows="8" placeholder="Paste your essay, paragraph or notes..."></textarea>
+      <label>Action</label>
+      <select id="action">
+        <option value="rewrite">Rewrite (clearer & better)</option>
+        <option value="expand">Expand / Elaborate</option>
+        <option value="shorten">Shorten / Summarize</option>
+        <option value="formal">Make more formal</option>
+        <option value="casual">Make more casual</option>
+        <option value="bullet">Turn into bullet points</option>
+        <option value="grammar">Fix grammar & style</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="runBtn">✨ Transform with AI</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy Result</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Result</h2>
+      <div id="result" class="result-box">Result will appear here.</div>
+    </div>
+    <div class="card">
+      <h2>Local History</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('essay', 'usage');
+
+    const actionPrompts = {
+      rewrite: 'Rewrite the following text to be clearer, more concise and better written. Keep the same meaning and language. Output only the rewritten text.',
+      expand: 'Expand and elaborate on the following text. Add useful detail, examples and smoother flow while keeping the original meaning. Output only the expanded text.',
+      shorten: 'Shorten and summarize the following text to roughly half the length while keeping the key points. Output only the shortened text.',
+      formal: 'Rewrite the following text in a more formal, professional tone. Output only the rewritten text.',
+      casual: 'Rewrite the following text in a more casual, friendly tone. Output only the rewritten text.',
+      bullet: 'Convert the following text into clear bullet points. Output only the bullet points.',
+      grammar: 'Fix all grammar, spelling and style issues in the following text. Improve clarity slightly but keep the original voice. Output only the corrected text.'
+    };
+
+    function localTransform(text, action) {
+      const t = text.trim();
+      if (!t) return 'Please enter some text.';
+      switch (action) {
+        case 'rewrite':
+          return t.replace(/\bi'm\b/gi, 'I am').replace(/\bdon't\b/gi, 'do not').replace(/\s+/g, ' ');
+        case 'expand':
+          return t + '\n\nFurther elaboration: This point can be developed by providing additional context and supporting evidence.';
+        case 'shorten':
+          const sents = t.match(/[^.!?]+[.!?]+/g) || [t];
+          return sents.slice(0, Math.max(1, Math.ceil(sents.length / 2))).join(' ').trim();
+        case 'formal':
+          return t.replace(/\bguys\b/gi, 'everyone').replace(/\bkinda\b/gi, 'somewhat').replace(/\bwanna\b/gi, 'want to');
+        case 'casual':
+          return t.replace(/\bdo not\b/gi, "don't").replace(/\bcannot\b/gi, "can't");
+        case 'bullet':
+          return t.split(/[.!?]+/).filter(s => s.trim()).map(s => '• ' + s.trim()).join('\n');
+        default:
+          return t;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('essay')) {
+        document.getElementById('result').textContent = 'Daily free limit reached. Resets at midnight.';
+        return;
+      }
+      const text = document.getElementById('input').value.trim();
+      if (!text) return;
+      const action = document.getElementById('action').value;
+      const btn = document.getElementById('runBtn');
+
+      SmartTools.setLoading(btn, true, 'Thinking…');
+      try {
+        let out;
+        if (true /* always use proxy */) {
+          const system = actionPrompts[action] || actionPrompts.rewrite;
+          out = await SmartTools.callGemini(text, system);
+        } else {
+          out = localTransform(text, action);
+          out += '';
+        }
+        document.getElementById('result').textContent = out;
+        SmartTools.incrementUsage('essay');
+        SmartTools.showUsageNotice('essay', 'usage');
+        SmartTools.addToHistory('essay', { preview: out.slice(0, 90) + (out.length > 90 ? '…' : ''), action });
+        renderHist();
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      SmartTools.copyText(document.getElementById('result').textContent);
+    });
+
+    function renderHist() {
+      SmartTools.renderHistory('essay', 'history', item => `<span class="text-sm">[${item.action}] ${item.preview}</span>`);
+    }
+    renderHist();
+  </script>
+</body>
+</html>

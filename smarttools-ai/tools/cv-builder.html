@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV / Resume Builder — SmartTools AI</title>
+  <meta name="description" content="Free online resume builder. Fill the form and download a clean professional PDF. No signup, data stays local." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav">
+        <button id="themeToggle" class="theme-toggle">☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📄 CV / Resume Builder</h1>
+    <p>Create a clean professional resume and download it as PDF. Everything stays in your browser.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="card">
+      <h2>Personal Info</h2>
+      <div class="calc-grid">
+        <div>
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="Jane Doe" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" id="email" placeholder="jane@email.com" />
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="text" id="phone" placeholder="+1 234 567 890" />
+        </div>
+        <div>
+          <label>Location</label>
+          <input type="text" id="location" placeholder="New York, NY" />
+        </div>
+        <div>
+          <label>LinkedIn / Website</label>
+          <input type="url" id="website" placeholder="https://linkedin.com/in/..." />
+        </div>
+        <div>
+          <label>Professional Title</label>
+          <input type="text" id="title" placeholder="Software Engineer" />
+        </div>
+      </div>
+      <label>Summary</label>
+      <textarea id="summary" placeholder="Short professional summary..."></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Experience</h2>
+      <label>Experience (one entry per block, format: Company | Role | Dates then description)</label>
+      <textarea id="experience" rows="6" placeholder="Acme Corp | Senior Developer | 2020 – Present
+- Built features used by 1M users
+- Led a team of 4 engineers
+
+StartupXYZ | Junior Dev | 2018 – 2020
+- ..."></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Education</h2>
+      <textarea id="education" rows="4" placeholder="University Name | B.Sc. Computer Science | 2014 – 2018
+GPA: 3.8 / Relevant coursework..."></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Skills</h2>
+      <textarea id="skills" rows="3" placeholder="JavaScript, Python, React, Node.js, SQL, AWS, Agile..."></textarea>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="generatePDF()">📥 Download PDF Resume</button>
+      <button class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft (local)</button>
+      <button class="btn btn-secondary" onclick="loadDraft()">📂 Load Draft</button>
+    </div>
+    <p id="status" class="text-sm text-muted mt-1"></p>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    function getData() {
+      return {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        location: document.getElementById('location').value,
+        website: document.getElementById('website').value,
+        title: document.getElementById('title').value,
+        summary: document.getElementById('summary').value,
+        experience: document.getElementById('experience').value,
+        education: document.getElementById('education').value,
+        skills: document.getElementById('skills').value
+      };
+    }
+
+    function generatePDF() {
+      const d = getData();
+      if (!d.fullName) {
+        document.getElementById('status').textContent = 'Please enter at least a name.';
+        return;
+      }
+      const doc = new jsPDF();
+      let y = 20;
+      const margin = 20;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const maxWidth = pageWidth - margin * 2;
+
+      // Name
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text(d.fullName, margin, y);
+      y += 8;
+
+      // Title
+      if (d.title) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(80);
+        doc.text(d.title, margin, y);
+        y += 7;
+      }
+
+      // Contact
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      const contact = [d.email, d.phone, d.location, d.website].filter(Boolean).join('  •  ');
+      doc.text(contact, margin, y);
+      y += 10;
+
+      // Line
+      doc.setDrawColor(200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 10;
+
+      doc.setTextColor(0);
+
+      function addSection(title, content) {
+        if (!content || !content.trim()) return;
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title.toUpperCase(), margin, y);
+        y += 2;
+        doc.setDrawColor(50);
+        doc.line(margin, y, margin + 40, y);
+        y += 7;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const lines = doc.splitTextToSize(content.trim(), maxWidth);
+        lines.forEach(line => {
+          if (y > 280) { doc.addPage(); y = 20; }
+          doc.text(line, margin, y);
+          y += 5;
+        });
+        y += 6;
+      }
+
+      addSection('Summary', d.summary);
+      addSection('Experience', d.experience);
+      addSection('Education', d.education);
+      addSection('Skills', d.skills);
+
+      doc.save((d.fullName.replace(/\s+/g, '_') || 'resume') + '_Resume.pdf');
+      document.getElementById('status').textContent = 'PDF downloaded!';
+      SmartTools.addToHistory('cv', { preview: d.fullName + ' – ' + (d.title || 'Resume') });
+    }
+
+    function saveDraft() {
+      localStorage.setItem('smarttools_cv_draft', JSON.stringify(getData()));
+      document.getElementById('status').textContent = 'Draft saved in this browser.';
+    }
+
+    function loadDraft() {
+      const raw = localStorage.getItem('smarttools_cv_draft');
+      if (!raw) {
+        document.getElementById('status').textContent = 'No draft found.';
+        return;
+      }
+      const d = JSON.parse(raw);
+      Object.keys(d).forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = d[k] || '';
+      });
+      document.getElementById('status').textContent = 'Draft loaded.';
+    }
+  </script>
+</body>
+</html>

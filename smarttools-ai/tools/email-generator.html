@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Generator — SmartTools AI</title>
+  <meta name="description" content="Generate professional emails with Gemini AI. Templates + local history." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>✉️ Email Generator</h1>
+    <p>Create polished emails with Gemini AI. Powered by Gemini AI.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>Template / Purpose</label>
+      <select id="template">
+        <option value="followup">Follow-up after meeting</option>
+        <option value="thankyou">Thank you</option>
+        <option value="request">Request / Ask for something</option>
+        <option value="apology">Apology</option>
+        <option value="intro">Introduction / Cold outreach</option>
+        <option value="decline">Polite decline</option>
+        <option value="custom">Custom (describe below)</option>
+      </select>
+      <div class="calc-grid">
+        <div>
+          <label>Recipient name</label>
+          <input type="text" id="toName" placeholder="Alex" />
+        </div>
+        <div>
+          <label>Your name</label>
+          <input type="text" id="fromName" placeholder="Sam" />
+        </div>
+        <div>
+          <label>Topic / Subject focus</label>
+          <input type="text" id="topic" placeholder="project proposal" />
+        </div>
+      </div>
+      <label>Extra details / instructions</label>
+      <textarea id="details" rows="3" placeholder="Any specific points to include..."></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="genBtn">✨ Generate with AI</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Generated Email</h2>
+      <div id="result" class="result-box">Your email will appear here.</div>
+    </div>
+    <div class="card">
+      <h2>Local History</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('email', 'usage');
+
+    const localTemplates = {
+      followup: (to, from, topic, extra) => `Subject: Following up on ${topic || 'our conversation'}\n\nHi ${to || 'there'},\n\nI hope you're doing well. I wanted to follow up on ${topic || 'our recent discussion'}.\n\n${extra || 'Please let me know if you need any additional information.'}\n\nLooking forward to hearing from you.\n\nBest regards,\n${from || 'Your Name'}`,
+      thankyou: (to, from, topic, extra) => `Subject: Thank you${topic ? ' – ' + topic : ''}\n\nHi ${to || 'there'},\n\nThank you so much${topic ? ' for ' + topic : ''}. I really appreciate it.\n\n${extra || ''}\n\nWarm regards,\n${from || 'Your Name'}`,
+      request: (to, from, topic, extra) => `Subject: Request regarding ${topic || 'assistance'}\n\nHi ${to || 'there'},\n\nI hope this email finds you well. I am writing to request ${topic || 'your assistance'}.\n\n${extra || 'Please let me know if this is possible.'}\n\nThank you for considering my request.\n\nBest,\n${from || 'Your Name'}`,
+      apology: (to, from, topic, extra) => `Subject: Apology${topic ? ' – ' + topic : ''}\n\nHi ${to || 'there'},\n\nI am writing to sincerely apologize${topic ? ' for ' + topic : ''}.\n\n${extra || 'I take full responsibility.'}\n\nThank you for your understanding.\n\nSincerely,\n${from || 'Your Name'}`,
+      intro: (to, from, topic, extra) => `Subject: Introduction – ${topic || 'quick hello'}\n\nHi ${to || 'there'},\n\nMy name is ${from || 'Your Name'} and I wanted to reach out regarding ${topic || 'a potential collaboration'}.\n\n${extra || ''}\n\nWould you be open to a short conversation?\n\nBest regards,\n${from || 'Your Name'}`,
+      decline: (to, from, topic, extra) => `Subject: Regarding ${topic || 'your request'}\n\nHi ${to || 'there'},\n\nThank you for thinking of me${topic ? ' regarding ' + topic : ''}. After careful consideration, I have to respectfully decline at this time.\n\n${extra || 'I wish you all the best.'}\n\nKind regards,\n${from || 'Your Name'}`,
+      custom: (to, from, topic, extra) => `Subject: ${topic || 'Hello'}\n\nHi ${to || 'there'},\n\n${extra || '[Your message here]'}\n\nBest regards,\n${from || 'Your Name'}`
+    };
+
+    document.getElementById('genBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('email')) {
+        document.getElementById('result').textContent = 'Daily limit reached.';
+        return;
+      }
+      const t = document.getElementById('template').value;
+      const to = document.getElementById('toName').value;
+      const from = document.getElementById('fromName').value;
+      const topic = document.getElementById('topic').value;
+      const extra = document.getElementById('details').value;
+      const btn = document.getElementById('genBtn');
+
+      SmartTools.setLoading(btn, true, 'Writing…');
+      try {
+        let email;
+        if (true /* always use proxy */) {
+          const prompt = `Write a professional email.
+Type: ${t}
+Recipient name: ${to || 'there'}
+Sender name: ${from || 'Your Name'}
+Topic: ${topic || 'general'}
+Extra details: ${extra || 'none'}
+Include a subject line. Output only the email (Subject: ... then body).`;
+          email = await SmartTools.callGemini(prompt, 'You are an expert professional email writer. Be concise, polite and natural.');
+        } else {
+          email = localTemplates[t](to, from, topic, extra);
+          email += '';
+        }
+        document.getElementById('result').textContent = email;
+        SmartTools.incrementUsage('email');
+        SmartTools.showUsageNotice('email', 'usage');
+        SmartTools.addToHistory('email', { preview: email.split('\n')[0] });
+        renderHist();
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+    document.getElementById('copyBtn').addEventListener('click', () => SmartTools.copyText(document.getElementById('result').textContent));
+    function renderHist() {
+      SmartTools.renderHistory('email', 'history', item => `<span class="text-sm">${item.preview}</span>`);
+    }
+    renderHist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Summarizer — SmartTools AI</title>
+  <meta name="description" content="Extract text from PDFs and summarize with Gemini AI. Files stay in your browser." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>📄 PDF Summarizer</h1>
+    <p>Extract text locally, then summarize with Gemini AI. Your PDF never leaves the device.</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">📄</div>
+        <p>Drop a PDF here or click to select</p>
+        <input type="file" id="fileInput" accept="application/pdf" />
+      </div>
+      <div id="status" class="text-sm text-muted mt-1"></div>
+    </div>
+
+    <div class="card">
+      <h2>Extracted Text (preview)</h2>
+      <textarea id="rawText" rows="6" readonly placeholder="Full text will appear here..."></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="summarizeBtn" disabled>✨ Summarize with AI</button>
+        <button class="btn btn-secondary" id="copyRaw" disabled>📋 Copy Text</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <div id="summary" class="result-box">Summary will appear here after extraction.</div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="copySum" disabled>📋 Copy Summary</button>
+      </div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    SmartTools.showUsageNotice('pdfsum', 'usage');
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    let fullText = '';
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+    async function handleFile(file) {
+      document.getElementById('status').textContent = 'Reading PDF…';
+      try {
+        const ab = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+        fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          fullText += content.items.map(it => it.str).join(' ') + '\n';
+          document.getElementById('status').textContent = `Page ${i}/${pdf.numPages}`;
+        }
+        document.getElementById('rawText').value = fullText.slice(0, 4000) + (fullText.length > 4000 ? '\n\n… (truncated for preview)' : '');
+        document.getElementById('status').textContent = `Extracted ${pdf.numPages} pages (${fullText.length} chars).`;
+        document.getElementById('summarizeBtn').disabled = false;
+        document.getElementById('copyRaw').disabled = false;
+      } catch (e) {
+        document.getElementById('status').textContent = 'Error: ' + e.message;
+      }
+    }
+
+    function localSummary(text, maxSentences = 5) {
+      const sentences = text.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+/g) || [text];
+      if (sentences.length <= maxSentences) return sentences.join(' ').trim();
+      const words = text.toLowerCase().match(/\b[a-z]{4,}\b/g) || [];
+      const freq = {};
+      words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+      const scored = sentences.map(s => {
+        const sw = s.toLowerCase().match(/\b[a-z]{4,}\b/g) || [];
+        const score = sw.reduce((a, w) => a + (freq[w] || 0), 0) / (sw.length || 1);
+        return { s, score };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored.slice(0, maxSentences).map(x => x.s.trim()).join(' ');
+    }
+
+    document.getElementById('summarizeBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('pdfsum')) {
+        document.getElementById('summary').textContent = 'Daily limit reached.';
+        return;
+      }
+      if (!fullText) return;
+      const btn = document.getElementById('summarizeBtn');
+      SmartTools.setLoading(btn, true, 'Summarizing…');
+      try {
+        let sum;
+        // Cap text length for free tier
+        const textForAI = fullText.slice(0, 30000);
+        if (true /* always use proxy */) {
+          sum = await SmartTools.callGemini(
+            `Summarize the following document clearly and concisely. Use bullet points for key ideas. Keep important facts, names and numbers.\n\n${textForAI}`,
+            'You are an expert at creating clear, accurate document summaries.'
+          );
+        } else {
+          sum = localSummary(fullText);
+          sum += '';
+        }
+        document.getElementById('summary').textContent = sum;
+        document.getElementById('copySum').disabled = false;
+        SmartTools.incrementUsage('pdfsum');
+        SmartTools.showUsageNotice('pdfsum', 'usage');
+        SmartTools.addToHistory('pdfsum', { preview: sum.slice(0, 100) + '…' });
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('summary').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+
+    document.getElementById('copyRaw').addEventListener('click', () => SmartTools.copyText(fullText));
+    document.getElementById('copySum').addEventListener('click', () => SmartTools.copyText(document.getElementById('summary').textContent));
+  </script>
+</body>
+</html>

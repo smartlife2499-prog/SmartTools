@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Explainer & Debugger — SmartTools AI</title>
+  <meta name="description" content="Paste code and get plain-English explanations with Gemini AI." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav"><button id="themeToggle" class="theme-toggle">☀️</button></nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>💻 Code Explainer & Debugger</h1>
+    <p>Paste a snippet for clear explanations and suggestions powered by Gemini AI (no key needed).</p>
+  </div>
+
+  <div class="tool-body">
+    <div id="usage"></div>
+    <div class="card">
+      <label>Code</label>
+      <textarea id="code" rows="12" placeholder="Paste your code here..." style="font-family:monospace;font-size:0.9rem"></textarea>
+      <label>Language (optional)</label>
+      <select id="lang">
+        <option value="auto">Auto-detect</option>
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="html">HTML/CSS</option>
+        <option value="other">Other</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="explainBtn">✨ Explain with AI</button>
+        <button class="btn btn-secondary" id="copyBtn">📋 Copy</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Explanation</h2>
+      <div id="result" class="result-box">Explanation will appear here.</div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+  <script src="../js/common.js"></script>
+  <script>
+    SmartTools.showUsageNotice('code', 'usage');
+
+    function localAnalyze(code, lang) {
+      const lines = code.split('\n').filter(l => l.trim());
+      const tips = [];
+      if (/console\.log|print\(|System\.out/.test(code)) tips.push('Contains debug print statements.');
+      if (/eval\(|innerHTML\s*=/.test(code)) tips.push('Possible security concern: dynamic code/HTML injection.');
+      if (/TODO|FIXME/.test(code)) tips.push('Contains TODO/FIXME comments.');
+      let overview = `This snippet has ${lines.length} non-empty lines. `;
+      if (lang === 'python' || (lang === 'auto' && /def |import |print\(/.test(code))) overview += 'Appears to be Python. ';
+      else if (lang === 'javascript' || (lang === 'auto' && /function |const |let |=>/.test(code))) overview += 'Appears to be JavaScript. ';
+      overview += '\n\n(Local analysis – AI service may be offline.)';
+      if (tips.length) overview += '\n\nSuggestions:\n' + tips.map(t => '• ' + t).join('\n');
+      return overview;
+    }
+
+    document.getElementById('explainBtn').addEventListener('click', async () => {
+      if (!SmartTools.canUse('code')) {
+        document.getElementById('result').textContent = 'Daily limit reached.';
+        return;
+      }
+      const code = document.getElementById('code').value;
+      if (!code.trim()) return;
+      const lang = document.getElementById('lang').value;
+      const btn = document.getElementById('explainBtn');
+
+      SmartTools.setLoading(btn, true, 'Analyzing…');
+      try {
+        let out;
+        if (true /* always use proxy */) {
+          const prompt = `Explain the following code in clear plain English.
+Language hint: ${lang}
+1. What does it do overall?
+2. Walk through the main parts.
+3. Point out any potential bugs, security issues or improvements.
+4. Keep the explanation concise but useful.
+
+Code:
+\`\`\`
+${code}
+\`\`\``;
+          out = await SmartTools.callGemini(prompt, 'You are a senior software engineer who explains code clearly to developers of all levels.');
+        } else {
+          out = localAnalyze(code, lang);
+        }
+        document.getElementById('result').textContent = out;
+        SmartTools.incrementUsage('code');
+        SmartTools.showUsageNotice('code', 'usage');
+        SmartTools.addToHistory('code', { preview: code.slice(0, 60).replace(/\n/g, ' ') + '…' });
+      } catch (e) {
+        let msg = SmartTools.friendlyAIError(e);
+        document.getElementById('result').textContent = 'Error: ' + msg;
+      } finally {
+        SmartTools.setLoading(btn, false);
+      }
+    });
+    document.getElementById('copyBtn').addEventListener('click', () => SmartTools.copyText(document.getElementById('result').textContent));
+  </script>
+</body>
+</html>

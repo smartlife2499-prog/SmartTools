@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text → Speech — SmartTools AI</title>
+  <meta name="description" content="Free text to speech. Listen to any text with natural browser voices. Adjust rate, pitch and voice. 100% private." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Google AdSense - replace ca-pub-XXXXXXXXXXXXXXXX with your real Publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">🧰 <span>SmartTools AI</span></a>
+      <nav class="nav">
+        <button id="themeToggle" class="theme-toggle">☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="tool-header">
+    <a href="../index.html" class="back-link">← All tools</a>
+    <h1>🗣️ Text → Speech</h1>
+    <p>Convert text to natural speech using your browser’s built-in voices. Nothing is uploaded.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="card">
+      <label for="ttsText">Enter text</label>
+      <textarea id="ttsText" placeholder="Type or paste text here...">Hello! Welcome to SmartTools AI. This text-to-speech tool runs entirely in your browser using the Web Speech API.</textarea>
+
+      <div class="speech-controls">
+        <div>
+          <label>Voice</label>
+          <select id="voiceSelect" class="voice-select"></select>
+        </div>
+        <div>
+          <label>Rate: <span id="rateVal">1</span></label>
+          <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" style="width:120px" />
+        </div>
+        <div>
+          <label>Pitch: <span id="pitchVal">1</span></label>
+          <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" style="width:120px" />
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="speakBtn">▶ Speak</button>
+        <button class="btn btn-secondary" id="pauseBtn">⏸ Pause</button>
+        <button class="btn btn-secondary" id="stopBtn">⏹ Stop</button>
+        <button class="btn btn-secondary" id="saveBtn">💾 Save to history</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Local History</h2>
+      <div id="history"></div>
+    </div>
+  </div>
+
+    
+    <div class="card" style="text-align:center;padding:1rem;margin-top:1.5rem">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  <footer class="footer">
+    <p><a href="../index.html">SmartTools AI</a> · <a href="../privacy.html">Privacy</a> · <a href="../about.html">About</a> · <a href="../contact.html">Contact</a></p>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script>
+    const synth = window.speechSynthesis;
+    let voices = [];
+    let utterance = null;
+
+    function loadVoices() {
+      voices = synth.getVoices();
+      const select = document.getElementById('voiceSelect');
+      select.innerHTML = '';
+      voices.forEach((v, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${v.name} (${v.lang})`;
+        select.appendChild(opt);
+      });
+    }
+
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
+
+    document.getElementById('rate').addEventListener('input', e => {
+      document.getElementById('rateVal').textContent = e.target.value;
+    });
+    document.getElementById('pitch').addEventListener('input', e => {
+      document.getElementById('pitchVal').textContent = e.target.value;
+    });
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      if (synth.speaking) synth.cancel();
+      const text = document.getElementById('ttsText').value.trim();
+      if (!text) return;
+      utterance = new SpeechSynthesisUtterance(text);
+      const idx = document.getElementById('voiceSelect').value;
+      if (voices[idx]) utterance.voice = voices[idx];
+      utterance.rate = parseFloat(document.getElementById('rate').value);
+      utterance.pitch = parseFloat(document.getElementById('pitch').value);
+      synth.speak(utterance);
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      if (synth.speaking) {
+        if (synth.paused) synth.resume();
+        else synth.pause();
+      }
+    });
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      synth.cancel();
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const text = document.getElementById('ttsText').value.trim();
+      if (!text) return;
+      SmartTools.addToHistory('tts', { text: text.slice(0, 200), preview: text.slice(0, 80) + (text.length > 80 ? '…' : '') });
+      renderHist();
+    });
+
+    function renderHist() {
+      SmartTools.renderHistory('tts', 'history', item => `<span class="text-sm">${item.preview || item.text}</span>`);
+    }
+    renderHist();
+    document.addEventListener('history-updated', e => { if (e.detail.toolId === 'tts') renderHist(); });
+  </script>
+</body>
+</html>
